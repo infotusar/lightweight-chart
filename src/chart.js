@@ -1,5 +1,4 @@
 'strict mode';
-const { error, log } = console;
 
 /******************[ Graphical Interface ]******************/
 const cryptoChart = document.getElementById('cryptoChart');
@@ -46,12 +45,9 @@ var chart = LightweightCharts.createChart(cryptoChart, {
   localization: {
     dateFormat: 'yyyy-MM-dd',
     timeFormatter: businessDayOrTimestamp => {
-      // console.log(businessDayOrTimestamp);
-
       if (LightweightCharts.isBusinessDay(businessDayOrTimestamp)) {
           return 'Format for business day';
       }
-
       return moment.unix(businessDayOrTimestamp).utcOffset(-5).format('YYYY-MM-DD HH:mm:ss');
     },
   },
@@ -60,18 +56,17 @@ var chart = LightweightCharts.createChart(cryptoChart, {
 chart.applyOptions({
     timezone: "America/Toronto",
     timeScale: {
-      // barSpacing: 75,
-      // minBarSpacing: .5,
-      // autoScale: true,
-      barSpacing: 2,
+      barSpacing: 75,
+      minBarSpacing: .5,
+      autoScale: true,
+      // barSpacing: 2,
       timeWithSeconds: true,
       timeVisible: true,
       secondsVisible: true,
       visible: true,
       overlay: false,
       tickMarkFormatter: (time, tickMarkType, locale) => {
-        // console.log(time, tickMarkType, locale);
-        return moment.unix(time).utcOffset(-5).format('DD, HH:mm:ss');
+        return moment.unix(time).utcOffset(-5).format('HH:mm:ss');
       }
     },
 });
@@ -210,15 +205,13 @@ const Data = (type) => {
         if(res.length > 0){
           cryptoChart.removeChild(loadchart);
         }
-
-        log(res)
+        
         // Add dual chart
         lineSeries.setData(res);
         areaSeries.setData(res);
-
         
         // Tailor ground
-
+        //crosshair support
         chart.subscribeCrosshairMove((param) => {
           // Legend feature
           loadLegend(param, res);
@@ -227,11 +220,10 @@ const Data = (type) => {
         // searching feature
         loadSearching(res);
         // searching feature
-        
         // Tailor ground
 
       })
-      .catch(e => log('Error loading data.'));
+      .catch(e => console.error('Error loading data.'));
 }
 /******************[ Data Logic ]******************/
 
@@ -269,7 +261,6 @@ function loadSearching(res){
 
     const searchtime = moment.tz(`${ev.detail.startDate.format('YYYY-MM-DD HH:mm:ss')}`, 'America/Toronto').unix();
     const index = res.findIndex(row => row.time == searchtime);
-    log('-----index:--', index);
     if(index === -1) return;
     
     // set markers
